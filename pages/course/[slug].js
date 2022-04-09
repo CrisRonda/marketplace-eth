@@ -3,7 +3,6 @@ import { BaseLayout } from '@components/ui/layout';
 import { getAllCourse } from '@content/courses/fetcher';
 
 export default function CourseBySlug({ course }) {
-    console.log(course);
     return (
         <div className="relative max-w-7xl mx-auto px-4">
             <Hero

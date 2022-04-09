@@ -1,4 +1,8 @@
+import { useWeb3 } from '@components/providers';
+import { useAccount } from '@components/web3/hooks/useAccount';
 import Link from 'next/link';
+import Button from '../button';
+
 const routes = [
     {
         href: '/',
@@ -18,6 +22,10 @@ const routes = [
     }
 ];
 const Navbar = () => {
+    const { connect, isLoading, isWeb3Loaded } = useWeb3();
+    const { account } = useAccount();
+    console.log(account);
+
     return (
         <section>
             <div className="relative pt-6 px-4 sm:px-6 lg:px-8">
@@ -36,12 +44,24 @@ const Navbar = () => {
                             ))}
                         </div>
                         <div>
-                            <a
-                                href="#"
-                                className="font-medium mr-8 text-indigo-600 hover:text-indigo-500"
-                            >
-                                Connect Wallet
-                            </a>
+                            {isLoading ? (
+                                <Button disabled>Loading ... </Button>
+                            ) : isWeb3Loaded ? (
+                                <Button onClick={connect}>
+                                    Connect Wallet
+                                </Button>
+                            ) : (
+                                <Button
+                                    onClick={() =>
+                                        window.open(
+                                            'https://metamask.io/download/',
+                                            '_blank'
+                                        )
+                                    }
+                                >
+                                    Install Metamask
+                                </Button>
+                            )}
                         </div>
                     </div>
                 </nav>
