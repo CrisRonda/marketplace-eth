@@ -1,5 +1,5 @@
-import { Curriculum, Hero, KeyPoints, Modal } from '@components/course';
-import { BaseLayout } from '@components/layout';
+import { Curriculum, Hero, KeyPoints, Modal } from '@components/ui/course';
+import { BaseLayout } from '@components/ui/layout';
 import { getAllCourse } from '@content/courses/fetcher';
 
 export default function CourseBySlug({ course }) {
