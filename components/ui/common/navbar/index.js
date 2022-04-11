@@ -24,7 +24,6 @@ const routes = [
 const Navbar = () => {
     const { connect, isLoading, isWeb3Loaded } = useWeb3();
     const { account } = useAccount();
-    console.log(account);
 
     return (
         <section>
@@ -47,9 +46,18 @@ const Navbar = () => {
                             {isLoading ? (
                                 <Button disabled>Loading ... </Button>
                             ) : isWeb3Loaded ? (
-                                <Button onClick={connect}>
-                                    Connect Wallet
-                                </Button>
+                                account ? (
+                                    <Button
+                                        variant="green"
+                                        className="cursor-default"
+                                    >
+                                        Hello!
+                                    </Button>
+                                ) : (
+                                    <Button onClick={connect}>
+                                        Connect Wallet
+                                    </Button>
+                                )
                             ) : (
                                 <Button
                                     onClick={() =>
@@ -66,6 +74,13 @@ const Navbar = () => {
                     </div>
                 </nav>
             </div>
+            {account && (
+                <div className="flex justify-end sm:px-6 lg:px-8 mt-2">
+                    <div className="text-white bg-green-600 p-2 rounded-md">
+                        {account}
+                    </div>
+                </div>
+            )}
         </section>
     );
 };

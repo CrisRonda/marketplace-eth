@@ -63,7 +63,7 @@ const Web3Provider = ({ children }) => {
         return {
             ...web3Api,
             connect: () => (provider ? connect() : errorMessage()),
-            getHooks: () => setupHooks(web3),
+            getHooks: () => setupHooks(web3, provider),
             hooks: setupHooks(web3),
             isWeb3Loaded: web3 !== null
         };
