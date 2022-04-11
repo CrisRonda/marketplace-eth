@@ -46,7 +46,7 @@ const Navbar = () => {
                             {isLoading ? (
                                 <Button disabled>Loading ... </Button>
                             ) : isWeb3Loaded ? (
-                                account ? (
+                                account?.data ? (
                                     <Button
                                         variant="green"
                                         className="cursor-default"
@@ -74,10 +74,10 @@ const Navbar = () => {
                     </div>
                 </nav>
             </div>
-            {account && (
+            {account?.data && (
                 <div className="flex justify-end sm:px-6 lg:px-8 mt-2">
                     <div className="text-white bg-green-600 p-2 rounded-md">
-                        {account}
+                        {account.data}
                     </div>
                 </div>
             )}
