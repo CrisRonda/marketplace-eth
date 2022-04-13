@@ -1,7 +1,8 @@
 import { useWeb3 } from '@components/providers';
-import { useAccount } from '@components/web3/hooks/useAccount';
+import { useAccount } from '@components/hooks/web3/useAccount';
 import Link from 'next/link';
 import Button from '../button';
+import { useRouter } from 'next/router';
 
 const routes = [
     {
@@ -24,6 +25,8 @@ const routes = [
 const Navbar = () => {
     const { connect, isLoading, isWeb3Loaded } = useWeb3();
     const { account } = useAccount();
+    const { pathname } = useRouter();
+    const isMarketplace = pathname.includes('/marketplace');
 
     return (
         <section>
@@ -51,7 +54,7 @@ const Navbar = () => {
                                         variant="green"
                                         className="cursor-default"
                                     >
-                                        Hello!
+                                        Hello{account.isAdmin && ' Admin'}!
                                     </Button>
                                 ) : (
                                     <Button onClick={connect}>
@@ -74,7 +77,7 @@ const Navbar = () => {
                     </div>
                 </nav>
             </div>
-            {account?.data && (
+            {account?.data && !isMarketplace && (
                 <div className="flex justify-end sm:px-6 lg:px-8 mt-2">
                     <div className="text-white bg-green-600 p-2 rounded-md">
                         {account.data}
