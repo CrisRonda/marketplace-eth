@@ -21,12 +21,10 @@ const handlerUseAccount = (web3, provider) => () => {
     }, [provider]);
 
     return {
-        account: {
-            data,
-            isAdmin: data && adminAddresses[web3.utils.keccak256(data)],
-            mutate,
-            ...rest
-        }
+        data,
+        isAdmin: data && adminAddresses[web3.utils.keccak256(data)],
+        mutate,
+        ...rest
     };
 };
 

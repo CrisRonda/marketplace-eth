@@ -10,6 +10,7 @@ const NETWORKS = {
     56: 'Binance Smart Chain',
     1337: 'Ganache Testnet'
 };
+const targetNetwork = NETWORKS[process.env.NEXT_PUBLIC_TARGET_CHAIN_ID];
 
 const handlerUseNetwork = (web3, provider) => {
     return () => {
@@ -30,11 +31,11 @@ const handlerUseNetwork = (web3, provider) => {
         }, [provider]);
 
         return {
-            network: {
-                data,
-                mutate,
-                ...rest
-            }
+            data,
+            isSupported: data === targetNetwork,
+            mutate,
+            targetNetwork,
+            ...rest
         };
     };
 };

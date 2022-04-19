@@ -18,7 +18,8 @@ const Web3Provider = ({ children }) => {
         provider: null,
         isLoading: true,
         web3: null,
-        error: null
+        error: null,
+        hooks: setupHooks()
     });
 
     const loadProvider = useCallback(async () => {
@@ -31,7 +32,8 @@ const Web3Provider = ({ children }) => {
             setWeb3Api({
                 provider,
                 web3,
-                contract: null
+                contract: null,
+                hooks: setupHooks(web3, provider)
             });
         } catch (error) {
             setWeb3Api((bef) => ({ ...bef, error }));
@@ -63,7 +65,6 @@ const Web3Provider = ({ children }) => {
         return {
             ...web3Api,
             connect: () => (provider ? connect() : errorMessage()),
-            getHooks: () => setupHooks(web3, provider),
             hooks: setupHooks(web3),
             isWeb3Loaded: web3 !== null
         };
@@ -81,6 +82,6 @@ export const useWeb3 = () => {
 };
 
 export const useHooks = (cb) => {
-    const { getHooks } = useWeb3();
-    return cb(getHooks());
+    const { hooks } = useWeb3();
+    return cb(hooks);
 };
