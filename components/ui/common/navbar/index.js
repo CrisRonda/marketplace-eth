@@ -23,7 +23,7 @@ const routes = [
     }
 ];
 const Navbar = () => {
-    const { connect, isLoading, isWeb3Loaded } = useWeb3();
+    const { connect, isLoading, requiredInstall } = useWeb3();
     const { account } = useAccount();
     const { pathname } = useRouter();
     const isMarketplace = pathname.includes('/marketplace');
@@ -48,20 +48,14 @@ const Navbar = () => {
                         <div>
                             {isLoading ? (
                                 <Button disabled>Loading ... </Button>
-                            ) : isWeb3Loaded ? (
-                                account?.data ? (
-                                    <Button
-                                        variant="green"
-                                        className="cursor-default"
-                                    >
-                                        Hello{account.isAdmin && ' Admin'}!
-                                    </Button>
-                                ) : (
-                                    <Button onClick={connect}>
-                                        Connect Wallet
-                                    </Button>
-                                )
-                            ) : (
+                            ) : account?.data ? (
+                                <Button
+                                    variant="green"
+                                    className="cursor-default"
+                                >
+                                    Hello{account.isAdmin && ' Admin'}!
+                                </Button>
+                            ) : requiredInstall ? (
                                 <Button
                                     onClick={() =>
                                         window.open(
@@ -71,6 +65,10 @@ const Navbar = () => {
                                     }
                                 >
                                     Install Metamask
+                                </Button>
+                            ) : (
+                                <Button onClick={connect}>
+                                    Connect Wallet
                                 </Button>
                             )}
                         </div>

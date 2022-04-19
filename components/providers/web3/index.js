@@ -61,12 +61,12 @@ const Web3Provider = ({ children }) => {
     }, [web3Api.provider]);
 
     const _web3Api = useMemo(() => {
-        const { web3, provider } = web3Api;
+        const { web3, provider, isLoading } = web3Api;
         return {
             ...web3Api,
             connect: () => (provider ? connect() : errorMessage()),
             hooks: setupHooks(web3),
-            isWeb3Loaded: web3 !== null
+            requiredInstall: !isLoading && !web3
         };
     }, [connect, errorMessage, web3Api]);
 

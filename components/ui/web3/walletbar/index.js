@@ -1,4 +1,8 @@
+import { useWeb3 } from '@components/providers';
+
 const WalletBar = ({ address, network }) => {
+    const { requiredInstall } = useWeb3();
+
     return (
         <section className="text-white bg-indigo-600">
             <div className="p-8">
@@ -27,6 +31,12 @@ const WalletBar = ({ address, network }) => {
                                         {network.targetNetwork}
                                     </strong>
                                 </div>
+                            </div>
+                        )}
+                        {requiredInstall && (
+                            <div className="bg-yellow-500 p-4 rounded-lg">
+                                Cannot connect to the Ethereum network. Please
+                                install MetaMask.
                             </div>
                         )}
                         {network?.data && (
