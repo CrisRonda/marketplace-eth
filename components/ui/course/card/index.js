@@ -1,7 +1,16 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-const Card = ({ title, id, coverImage, type, description, slug, Footer }) => {
+const Card = ({
+    title,
+    id,
+    coverImage,
+    type,
+    description,
+    slug,
+    Footer,
+    disabled
+}) => {
     return (
         <div
             key={id}
@@ -14,7 +23,9 @@ const Card = ({ title, id, coverImage, type, description, slug, Footer }) => {
                         width="200"
                         height="230"
                         layout="responsive"
-                        className="object-cover"
+                        className={`object-cover ${
+                            disabled && 'filter grayscale'
+                        }`}
                         src={coverImage}
                         alt={title}
                     />
