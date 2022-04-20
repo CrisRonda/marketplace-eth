@@ -1,6 +1,9 @@
+import { useEthPrice } from '@components/hooks/useEthPrice';
 import Image from 'next/image';
 
-const EthRates = ({ eth, pricePerCourse }) => {
+const EthRates = () => {
+    const { eth } = useEthPrice();
+
     return (
         <div className="grid grid-cols-2 mb-5 ">
             <div className="flex flex-1 items-stretch text-center">
@@ -13,7 +16,10 @@ const EthRates = ({ eth, pricePerCourse }) => {
                             src="/small-eth.webp"
                             alt="Ethereum-logo"
                         />
-                        <span className="text-2xl font-bold"> = {eth}$</span>
+                        <span className="text-2xl font-bold">
+                            {' '}
+                            = {eth.data}$
+                        </span>
                     </div>
                     <p className="text-xl text-gray-500">Current eth Price</p>
                 </div>
@@ -22,7 +28,7 @@ const EthRates = ({ eth, pricePerCourse }) => {
                 <div className="p-10 border drop-shadow rounded-md">
                     <div className="flex items-center">
                         <span className="text-2xl font-bold">
-                            {pricePerCourse}
+                            {eth.pricePerCourse}
                         </span>
                         <Image
                             layout="fixed"
