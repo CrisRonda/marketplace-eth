@@ -1,8 +1,9 @@
 import { useWeb3 } from '@components/providers';
 import { useAccount } from '@components/hooks/web3';
-import Link from 'next/link';
+
 import Button from '../button';
 import { useRouter } from 'next/router';
+import ActiveLink from '../link';
 
 const routes = [
     {
@@ -35,14 +36,14 @@ const Navbar = () => {
                     <div className="flex justify-between">
                         <div>
                             {routes.map((item) => (
-                                <Link key={item.href} href={item.href}>
+                                <ActiveLink key={item.href} href={item.href}>
                                     <a
                                         href="/course"
                                         className="font-medium mr-8 text-gray-500 hover:text-gray-900"
                                     >
                                         {item.label}
                                     </a>
-                                </Link>
+                                </ActiveLink>
                             ))}
                         </div>
                         <div>

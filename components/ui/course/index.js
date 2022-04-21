@@ -4,3 +4,4 @@ export { default as KeyPoints } from './keypoints';
 export { default as List } from './list';
 export { default as Modal } from './modal';
 export { default as Card } from './card';
+export { default as OwnedCourseCard } from './card/OwnedCourseCard';
