@@ -1,13 +1,22 @@
+import { Button, Message } from '@components/ui/common';
+import { OwnedCourseCard } from '@components/ui/course';
 import { BaseLayout } from '@components/ui/layout';
-import { Header } from '@components/ui/marketplace';
+import { Header as MarketHeader } from '@components/ui/marketplace';
 
-const Owned = () => {
+export default function OwnedCourses() {
     return (
         <>
-            <Header />
+            <div className="py-4">
+                <MarketHeader />
+            </div>
+            <section className="grid grid-cols-1">
+                <OwnedCourseCard>
+                    <Message>My custom message!</Message>
+                    <Button>Watch the course</Button>
+                </OwnedCourseCard>
+            </section>
         </>
     );
-};
+}
 
-export default Owned;
-Owned.Layout = BaseLayout;
+OwnedCourses.Layout = BaseLayout;
