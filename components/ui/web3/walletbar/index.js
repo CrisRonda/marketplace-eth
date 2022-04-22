@@ -8,7 +8,7 @@ const WalletBar = () => {
     return (
         <section className="text-white bg-indigo-600">
             <div className="p-8">
-                <h1 className="text-2xl">Hello, {account.address}</h1>
+                <h1 className="text-2xl">Hello, {account.data}</h1>
                 <h2 className="subtitle mb-5 text-xl">
                     I hope you are having a great day!
                 </h2>
