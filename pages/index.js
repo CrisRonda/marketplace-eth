@@ -2,7 +2,6 @@ import Image from 'next/image';
 
 import { Breadcrumbs, Hero } from '@components/ui/common';
 import { EthRates, WalletBar } from '@components/ui/web3';
-import { OwnedCourseCard } from '@components/ui/course';
 import { List, Card as CourseCard } from '@components/ui/course';
 import { BaseLayout } from '@components/ui/layout';
 import { getAllCourse } from '@content/courses/fetcher';
@@ -12,9 +11,6 @@ export default function Home({ courses }) {
         <>
             <Hero />
             <Breadcrumbs />
-            <EthRates />
-            <WalletBar />
-            <OwnedCourseCard />
             <List courses={courses}>
                 {(course) => <CourseCard key={course.id} {...course} />}
             </List>

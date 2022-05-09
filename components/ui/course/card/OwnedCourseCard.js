@@ -7,7 +7,7 @@ const STATE_COLORS = {
 };
 
 export default function OwnedCourseCard({ children, course }) {
-    const stateColor = STATE_COLORS[course.state];
+    const stateColor = STATE_COLORS[course?.state] || 'white';
 
     return (
         <div className="bg-white border shadow overflow-hidden sm:rounded-lg mb-3">

@@ -22,6 +22,12 @@ export const useOwnedCourses = (...args) => {
         ownedCourses: res
     };
 };
+export const useOwnedCourse = (...args) => {
+    const res = enhanceHook(useHooks((hooks) => hooks.useOwnedCourse)(...args));
+    return {
+        ownedCourse: res
+    };
+};
 
 export const useNetwork = () => {
     const swrRes = enhanceHook(useHooks((hooks) => hooks.useNetwork)());
