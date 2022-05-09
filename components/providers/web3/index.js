@@ -13,15 +13,29 @@ import { loadContract } from '@utils/loadContract';
 
 const Web3Context = createContext();
 
+const createWeb3State = ({ web3, provider, contract, isLoading }) => {
+    return {
+        contract,
+        provider,
+        isLoading,
+        web3,
+        hooks: setupHooks({
+            web3,
+            provider,
+            contract
+        })
+    };
+};
+
 const Web3Provider = ({ children }) => {
-    const [web3Api, setWeb3Api] = useState({
-        contract: null,
-        provider: null,
-        isLoading: true,
-        web3: null,
-        error: null,
-        hooks: setupHooks({})
-    });
+    const [web3Api, setWeb3Api] = useState(
+        createWeb3State({
+            web3: null,
+            provider: null,
+            contract: null,
+            isLoading: false
+        })
+    );
 
     const loadProvider = useCallback(async () => {
         try {
@@ -31,12 +45,14 @@ const Web3Provider = ({ children }) => {
             }
             const web3 = new Web3(provider);
             const contract = await loadContract('CourseMarketPlace', web3);
-            setWeb3Api({
-                provider,
-                web3,
-                contract: contract,
-                hooks: setupHooks({ web3, provider, contract })
-            });
+            setWeb3Api(
+                createWeb3State({
+                    provider,
+                    web3,
+                    contract,
+                    isLoading: false
+                })
+            );
         } catch (error) {
             setWeb3Api((bef) => ({ ...bef, error }));
         } finally {
