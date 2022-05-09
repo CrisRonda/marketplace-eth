@@ -35,7 +35,7 @@ const Card = ({
                         {type}
                     </div>
                     <Link href={`/course/${slug}`}>
-                        <a className="block mt-1 text-lg leading-tight font-medium text-black hover:underline">
+                        <a className="block mt-1 text-sm xs:text-lg leading-tight font-medium text-black hover:underline">
                             {title}
                         </a>
                     </Link>

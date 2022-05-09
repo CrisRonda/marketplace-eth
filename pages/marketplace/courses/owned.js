@@ -4,10 +4,13 @@ import { OwnedCourseCard } from '@components/ui/course';
 import { BaseLayout } from '@components/ui/layout';
 import { Header as MarketHeader } from '@components/ui/marketplace';
 import { getAllCourse } from '@content/courses/fetcher';
+import { useRouter } from 'next/router';
 
 export default function OwnedCourses({ courses }) {
     const { account } = useAccount();
     const { ownedCourses } = useOwnedCourses(courses, account.data);
+    const router = useRouter();
+
     return (
         <>
             <div className="py-4">
@@ -18,6 +21,13 @@ export default function OwnedCourses({ courses }) {
                     <OwnedCourseCard key={course.id} course={course}>
                         {/* <Message>My custom message!</Message>
                         <Button>Watch the course</Button> */}
+                        <Button
+                            onClick={() =>
+                                router.push(`/courses/${course.slug}`)
+                            }
+                        >
+                            Watch the course
+                        </Button>
                     </OwnedCourseCard>
                 ))}
             </section>

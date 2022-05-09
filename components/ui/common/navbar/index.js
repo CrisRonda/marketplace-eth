@@ -33,7 +33,7 @@ const Navbar = () => {
         <section>
             <div className="relative pt-6 px-4 sm:px-6 lg:px-8">
                 <nav className="relative" aria-label="Global">
-                    <div className="flex justify-between">
+                    <div className="flex flex-col xs:flex-row md:justify-between">
                         <div>
                             {routes.map((item) => (
                                 <ActiveLink key={item.href} href={item.href}>

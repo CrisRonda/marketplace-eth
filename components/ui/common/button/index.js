@@ -6,6 +6,7 @@ const Button = ({
     ...rest
 }) => {
     const variants = {
+        white: 'text-black bg-white',
         purple: 'text-indigo-600 hover:text-indigo-500',
         red: 'text-red-600 hover:text-red-500',
         green: 'text-green-600 hover:text-green-500'

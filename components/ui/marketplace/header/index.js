@@ -18,13 +18,15 @@ const LINKS = [
 
 const Header = () => {
     return (
-        <div className="py-5">
-            <WalletBar />
+        <>
+            <div className="pt-4">
+                <WalletBar />
+            </div>
             <EthRates />
-            <div className="flex flex-row-reverse py-4 px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-row-reverse p-4 sm:px-6 lg:px-8">
                 <Breadcrumbs items={LINKS} />
             </div>
-        </div>
+        </>
     );
 };
 export default Header;
