@@ -9,6 +9,7 @@ import {
 import detectEthereumProvider from '@metamask/detect-provider';
 import Web3 from 'web3';
 import { setupHooks } from './hooks/setupHooks';
+import { loadContract } from '@utils/loadContract';
 
 const Web3Context = createContext();
 
@@ -19,7 +20,7 @@ const Web3Provider = ({ children }) => {
         isLoading: true,
         web3: null,
         error: null,
-        hooks: setupHooks()
+        hooks: setupHooks({})
     });
 
     const loadProvider = useCallback(async () => {
@@ -29,11 +30,12 @@ const Web3Provider = ({ children }) => {
                 throw new Error('No provider found');
             }
             const web3 = new Web3(provider);
+            const contract = await loadContract('CourseMarketPlace', web3);
             setWeb3Api({
                 provider,
                 web3,
-                contract: null,
-                hooks: setupHooks(web3, provider)
+                contract: contract,
+                hooks: setupHooks({ web3, provider, contract })
             });
         } catch (error) {
             setWeb3Api((bef) => ({ ...bef, error }));
@@ -65,7 +67,7 @@ const Web3Provider = ({ children }) => {
         return {
             ...web3Api,
             connect: () => (provider ? connect() : errorMessage()),
-            hooks: setupHooks(web3),
+            hooks: setupHooks({ web3 }),
             requiredInstall: !isLoading && !web3
         };
     }, [connect, errorMessage, web3Api]);

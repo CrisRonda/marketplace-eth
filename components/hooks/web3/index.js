@@ -14,6 +14,13 @@ export const useAccount = () => {
     };
 };
 
+export const useOwnedCourses = () => {
+    const res = useHooks((hooks) => hooks.useOwnedCourses)();
+    return {
+        ownedCourses: { data: res }
+    };
+};
+
 export const useNetwork = () => {
     const swrRes = enhanceHook(useHooks((hooks) => hooks.useNetwork)());
     return {
