@@ -14,7 +14,6 @@ export default function Message({ children, type = 'success' }) {
     }
 
     const messageType = TYPES[type];
-    console.log(messageType);
     return (
         <div className={`bg-${messageType}-100 rounded-xl mb-3`}>
             <div className="max-w-7xl mx-auto py-3 px-3 sm:px-3 lg:px-3">

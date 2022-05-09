@@ -83,7 +83,7 @@ const Web3Provider = ({ children }) => {
         return {
             ...web3Api,
             connect: () => (provider ? connect() : errorMessage()),
-            hooks: setupHooks({ web3 }),
+            hooks: setupHooks({ web3, provider, contract: web3Api.contract }),
             requiredInstall: !isLoading && !web3
         };
     }, [connect, errorMessage, web3Api]);

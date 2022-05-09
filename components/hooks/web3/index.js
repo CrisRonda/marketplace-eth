@@ -14,10 +14,12 @@ export const useAccount = () => {
     };
 };
 
-export const useOwnedCourses = () => {
-    const res = useHooks((hooks) => hooks.useOwnedCourses)();
+export const useOwnedCourses = (...args) => {
+    const res = enhanceHook(
+        useHooks((hooks) => hooks.useOwnedCourses)(...args)
+    );
     return {
-        ownedCourses: { data: res }
+        ownedCourses: res
     };
 };
 
