@@ -5,7 +5,7 @@ import { BaseLayout } from '@components/ui/layout';
 import { Header as MarketHeader } from '@components/ui/marketplace';
 import { getAllCourse } from '@content/courses/fetcher';
 import { useRouter } from 'next/router';
-
+import Link from 'next/link';
 export default function OwnedCourses({ courses }) {
     const { account } = useAccount();
     const { ownedCourses } = useOwnedCourses(courses, account.data);
@@ -17,10 +17,23 @@ export default function OwnedCourses({ courses }) {
                 <MarketHeader />
             </div>
             <section className="grid grid-cols-1">
+                {ownedCourses.hasInitialResponse &&
+                    (!ownedCourses.data || !ownedCourses?.data?.length) && (
+                        <div className="w-1/2">
+                            <Message type="warning">
+                                You don&apos;t have any courses yet.
+                                <br />
+                                <Link href="/marketplace">
+                                    <a className="block font-normal hover:underline">
+                                        <i>Purchase Course</i>
+                                    </a>
+                                </Link>
+                            </Message>
+                        </div>
+                    )}
+
                 {ownedCourses.data?.map((course) => (
                     <OwnedCourseCard key={course.id} course={course}>
-                        {/* <Message>My custom message!</Message>
-                        <Button>Watch the course</Button> */}
                         <Button
                             onClick={() =>
                                 router.push(`/courses/${course.slug}`)
