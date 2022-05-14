@@ -20,6 +20,9 @@ const handlerUseNetwork = (web3, provider) => {
             ...rest
         } = useSWR(web3 && 'web3/network', async () => {
             const networkName = await web3.eth.getChainId();
+            if (!networkName) {
+                throw new Error('No network found. Please refresh the browser');
+            }
             return NETWORKS[networkName];
         });
 

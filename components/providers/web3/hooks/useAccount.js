@@ -9,7 +9,12 @@ const handlerUseAccount = (web3, provider) => () => {
         web3 ? 'web3/accounts' : null,
         async () => {
             const accounts = await web3.eth.getAccounts();
-            return accounts[0];
+            const account = accounts[0];
+
+            if (!account) {
+                throw new Error('No account found. Please refresh the browser');
+            }
+            return account;
         }
     );
 
