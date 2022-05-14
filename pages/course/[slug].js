@@ -1,15 +1,20 @@
 import { useAccount, useOwnedCourse } from '@components/hooks/web3';
+import { useWeb3 } from '@components/providers';
 import { Message } from '@components/ui/common';
 import { Curriculum, Hero, KeyPoints, Modal } from '@components/ui/course';
 import { BaseLayout } from '@components/ui/layout';
 import { getAllCourse } from '@content/courses/fetcher';
 
 export default function CourseBySlug({ course }) {
+    const { isLoading } = useWeb3();
     const { account } = useAccount();
     const { ownedCourse } = useOwnedCourse(course, account.data);
     const courseState = ownedCourse.data?.state;
     const isLocked =
-        courseState === 'purchased' || courseState === 'deactivated';
+        !courseState ||
+        courseState === 'purchased' ||
+        courseState === 'deactivated';
+
     return (
         <div className="relative max-w-7xl mx-auto px-4">
             <Hero
@@ -47,7 +52,11 @@ export default function CourseBySlug({ course }) {
                     </Message>
                 )}
             </div>
-            <Curriculum locked={isLocked} courseState={courseState} />
+            <Curriculum
+                locked={isLocked}
+                courseState={courseState}
+                isLoading={isLoading}
+            />
             <Modal />
         </div>
     );

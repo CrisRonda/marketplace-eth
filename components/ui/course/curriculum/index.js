@@ -1,3 +1,4 @@
+import { Loader } from '@components/ui/common';
 import Link from 'next/link';
 const lectures = [
     'How to init App',
@@ -7,7 +8,7 @@ const lectures = [
     'How to write For Loops',
     'Safe operator'
 ];
-const Curriculum = ({ locked, courseState }) => {
+const Curriculum = ({ locked, courseState, isLoading }) => {
     const statusClass =
         'px-2 inline-flex text-xs leading-5 font-semibold rounded-full';
     return (
@@ -66,7 +67,9 @@ const Curriculum = ({ locked, courseState }) => {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                {locked ? (
+                                                {isLoading ? (
+                                                    <Loader />
+                                                ) : locked ? (
                                                     <>
                                                         {courseState ===
                                                             'deactivated' && (

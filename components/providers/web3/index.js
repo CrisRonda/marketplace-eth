@@ -33,7 +33,7 @@ const Web3Provider = ({ children }) => {
             web3: null,
             provider: null,
             contract: null,
-            isLoading: false
+            isLoading: true
         })
     );
 
