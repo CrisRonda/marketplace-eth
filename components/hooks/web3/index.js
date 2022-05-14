@@ -41,6 +41,14 @@ export const useOwnedCourse = (...args) => {
         ownedCourse: res
     };
 };
+export const useManageCourses = (...args) => {
+    const res = enhanceHook(
+        useHooks((hooks) => hooks.useManagedCourses)(...args)
+    );
+    return {
+        managedCourses: res
+    };
+};
 
 export const useNetwork = () => {
     const swrRes = enhanceHook(useHooks((hooks) => hooks.useNetwork)());

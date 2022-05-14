@@ -1,9 +1,13 @@
+import { useAccount, useManageCourses } from '@components/hooks/web3';
 import { Button } from '@components/ui/common';
 import { CourseFilter, OwnedCourseCard } from '@components/ui/course';
 import { BaseLayout } from '@components/ui/layout';
 import { Header } from '@components/ui/marketplace';
 
 const Manage = () => {
+    const { account } = useAccount();
+    const { managedCourses } = useManageCourses(account.data);
+    console.log(managedCourses.data);
     return (
         <>
             <Header />
