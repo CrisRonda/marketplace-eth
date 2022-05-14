@@ -27,10 +27,11 @@ const handlerUseNetwork = (web3, provider) => {
         });
 
         useEffect(() => {
-            provider &&
-                provider.on('chainChanged', (chainId) =>
-                    mutate(NETWORKS[chainId])
-                );
+            const mutator = (chainId) => mutate(NETWORKS[chainId]);
+            provider?.on('chainChanged', mutator);
+            return () => {
+                provider?.removeListener('chainChanged', mutator);
+            };
         }, [provider]);
 
         return {
