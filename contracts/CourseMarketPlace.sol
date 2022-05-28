@@ -80,22 +80,22 @@ contract CourseMarketPlace {
     }
 
     function activateCourse(bytes32 courseHash)
-     external
-     onlyOwner
-    {
-
-        if(!isCourseCreated(courseHash)){
-            revert CourseIsNotCreated();
-        }
-
-        Course storage course = ownedCourses[courseHash];
-        course.state = State.ACTIVATED;
-
-        if(course.state !=State.PURCHASED){
-            revert InvalidState();
-        }
-
+    external
+    onlyOwner
+  {
+    if (!isCourseCreated(courseHash)) {
+      revert CourseIsNotCreated();
     }
+
+    Course storage course = ownedCourses[courseHash];
+
+    if (course.state != State.PURCHASED) {
+      revert InvalidState();
+    }
+
+    course.state = State.ACTIVATED;
+  }
+
 
     function transferOwnership(address newOwner)
      external
