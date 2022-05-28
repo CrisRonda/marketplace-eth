@@ -47,6 +47,11 @@ contract CourseMarketPlace {
     /// Only owner has access!
     error OnlyOwner();
 
+    // Course has invalid State!
+    error InvalidState();
+
+    // Course is not created!!
+    error CourseIsNotCreated();
 
 //  course id - 10 --> this is the course ID
 // 0x00000000000000000000000000003130 -> this is the course ID in hex
@@ -72,6 +77,24 @@ contract CourseMarketPlace {
             state: State.PURCHASED
         });
         return courseHash;
+    }
+
+    function activateCourse(bytes32 courseHash)
+     external
+     onlyOwner
+    {
+
+        if(!isCourseCreated(courseHash)){
+            revert CourseIsNotCreated();
+        }
+
+        Course storage course = ownedCourses[courseHash];
+        course.state = State.ACTIVATED;
+
+        if(course.state !=State.PURCHASED){
+            revert InvalidState();
+        }
+
     }
 
     function transferOwnership(address newOwner)
@@ -118,6 +141,15 @@ contract CourseMarketPlace {
         owner = payable(newOwner);
 
     }
+
+    function isCourseCreated(bytes32 courseHash)
+    private
+    view
+    returns (bool)
+    {
+        return ownedCourses[courseHash].owner != 0x0000000000000000000000000000000000000000;
+    }
+
 
     function hasCourseOwnership(bytes32 courseHash)
     private
