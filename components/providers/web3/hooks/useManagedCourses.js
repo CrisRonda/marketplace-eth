@@ -4,8 +4,8 @@ import useSWR from 'swr';
 const handleuseManageCourses = (web3, contract) => (account) => {
     const swrRes = useSWR(
         () =>
-            web3 && contract && account
-                ? `web3/manageCourses/${account}`
+            web3 && contract && account?.data && account?.isAdmin
+                ? `web3/manageCourses/${account.data}`
                 : null,
         async () => {
             const courses = [];
