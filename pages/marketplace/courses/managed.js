@@ -9,12 +9,36 @@ import { useWeb3 } from '@components/providers';
 const Manage = () => {
     const { account } = useAdmin({ redirectTo: '/marketplace' });
     const { managedCourses } = useManageCourses(account);
-    const { web3 } = useWeb3();
+    const { web3, contract } = useWeb3();
 
     if (!account.isAdmin) {
         return null;
     }
 
+    const activateCourse = async (courseHash) => {
+        try {
+            console.log(1);
+            await contract.methods.activateCourse(courseHash).send({
+                from: account.data
+            });
+            console.log(2);
+        } catch (error) {
+            console.error(error);
+            console.log(3);
+        }
+    };
+    const deactivateCourse = async (courseHash) => {
+        try {
+            console.log(1);
+            await contract.methods.deactivateCourse(courseHash).send({
+                from: account.data
+            });
+            console.log(2);
+        } catch (error) {
+            console.error(error);
+            console.log(3);
+        }
+    };
     return (
         <>
             <Header />
@@ -25,6 +49,8 @@ const Manage = () => {
                         key={course.ownedCourseId}
                         course={course}
                         web3={web3}
+                        activateCourse={activateCourse}
+                        deactivateCourse={deactivateCourse}
                     />
                 ))}
             </section>
@@ -34,7 +60,12 @@ const Manage = () => {
 
 export default Manage;
 Manage.Layout = BaseLayout;
-const VerificationInput = ({ course, web3 }) => {
+const VerificationInput = ({
+    course,
+    web3,
+    activateCourse,
+    deactivateCourse
+}) => {
     const [email, setEmail] = useState('');
     const [proofedOwnership, setProofedOwnership] = useState({});
 
@@ -87,6 +118,22 @@ const VerificationInput = ({ course, web3 }) => {
             {proofedOwnership[course.hash] === false && (
                 <div className="mt-2">
                     <Message type="danger">Wrong Proof!</Message>
+                </div>
+            )}
+            {course.state === 'purchased' && (
+                <div className="mt-4">
+                    <Button
+                        variant="green"
+                        onClick={() => activateCourse(course.hash)}
+                    >
+                        Activate
+                    </Button>
+                    <Button
+                        variant="red"
+                        onClick={() => deactivateCourse(course.hash)}
+                    >
+                        Deactivate
+                    </Button>
                 </div>
             )}
         </ManagedCourseCard>
