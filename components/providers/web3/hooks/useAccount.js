@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import useSWR from 'swr';
 
 const adminAddresses = {
-    '0xe7bd02deb6e9cac2741bfffa7523adf247b7466058e9d15b00fd5d44cabc21ea': true
+    '0x48f78ac25c02af28c64e5ea4d7e4c8536c562fac010a31c0cee0dc08bf5a70fd': true
 };
 const handlerUseAccount = (web3, provider) => () => {
     const { mutate, data, ...rest } = useSWR(
@@ -27,7 +27,7 @@ const handlerUseAccount = (web3, provider) => () => {
         return () => {
             provider?.removeListener('accountsChanged', mutator);
         };
-    }, [provider]);
+    }, [mutate]);
 
     return {
         data,
