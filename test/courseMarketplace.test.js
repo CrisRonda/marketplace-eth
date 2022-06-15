@@ -229,12 +229,14 @@ contract('CourseMarketplace', (accounts) => {
 
         it('should be able repurchase with the original buyer', async () => {
             const beforeTxBuyerBalance = await getBalance(buyer);
+            const beforeTxContractBalance = await getBalance(_contract.address);
 
             const result = await _contract.repurchaseCourse(courseHash2, {
                 from: buyer,
                 value
             });
             const afterTxBuyerBalance = await getBalance(buyer);
+            const afterTxContractBalance = await getBalance(_contract.address);
 
             // START - Calculating the gas used in this tx
             const gasCost = await getGas(result);
@@ -258,6 +260,11 @@ contract('CourseMarketplace', (accounts) => {
                     .sub(gasCost)
                     .toString(),
                 afterTxBuyerBalance,
+                'Buyer balance is not correct!'
+            );
+            assert.equal(
+                toBN(beforeTxContractBalance).add(toBN(value)).toString(),
+                afterTxContractBalance,
                 'Buyer balance is not correct!'
             );
         });
