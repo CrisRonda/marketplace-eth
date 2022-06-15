@@ -169,12 +169,14 @@ contract('CourseMarketplace', (accounts) => {
 
     describe('Deactivate course', () => {
         let courseHash2 = null;
+        let currentOwner = null;
         before(async () => {
             await _contract.purchaseCourse(courseId2, proof2, {
                 from: buyer,
                 value
             });
             courseHash2 = await _contract.getCourseHashAtIndex(1);
+            currentOwner = await _contract.getContractOwner();
         });
 
         it('should NOT be able to deactivate course by NOT contract owner', async () => {
@@ -183,9 +185,18 @@ contract('CourseMarketplace', (accounts) => {
             );
         });
         it('should have status of deactivated and price 0', async () => {
-            await _contract.deactivateCourse(courseHash2, {
+            const beforeTxBuyerBalance = await getBalance(buyer);
+            const beforeTxContractBalance = await getBalance(_contract.address);
+            const beforeTxOwnerBalance = await getBalance(currentOwner);
+
+            const result = await _contract.deactivateCourse(courseHash2, {
                 from: contractOwner
             });
+            const afterTxBuyerBalance = await getBalance(buyer);
+            const afterTxContractBalance = await getBalance(_contract.address);
+            const afterTxOwnerBalance = await getBalance(currentOwner);
+            const gasCost = await getGas(result);
+
             const course = await _contract.getCourseByHash(courseHash2);
             const expectedState = 2;
             const expectedPrice = 0;
@@ -195,7 +206,26 @@ contract('CourseMarketplace', (accounts) => {
                 expectedState,
                 'Course is NOT deactivated!'
             );
-            assert.equal(course.state, expectedState, 'Course price is not 0!');
+            assert.equal(course.price, expectedPrice, 'Course price is not 0!');
+
+            // I have to refund the payment to buyer
+            assert.equal(
+                toBN(beforeTxBuyerBalance).add(toBN(value)).toString(),
+                toBN(afterTxBuyerBalance).toString(),
+                'Buyer balance is not correct!'
+            );
+            // I have to decrease the payment's buyer in the contract balance
+            assert.equal(
+                toBN(beforeTxContractBalance).sub(toBN(value)).toString(),
+                toBN(afterTxContractBalance).toString(),
+                'Contract balance is not correct!'
+            );
+            // that operations has a gas fee so it should be payment with contract owner balance
+            assert.equal(
+                toBN(beforeTxOwnerBalance).sub(toBN(gasCost)).toString(),
+                toBN(afterTxOwnerBalance).toString(),
+                'Contract owner balance is not correct!'
+            );
         });
         it('should NOT be able to activate deactivate course', async () => {
             await catchRevert(
