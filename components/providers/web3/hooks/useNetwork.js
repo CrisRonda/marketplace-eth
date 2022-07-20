@@ -12,32 +12,24 @@ const NETWORKS = {
 };
 const targetNetwork = NETWORKS[process.env.NEXT_PUBLIC_TARGET_CHAIN_ID];
 
-const handlerUseNetwork = (web3, provider) => {
+const handlerUseNetwork = (web3) => {
     return () => {
-        const {
-            mutate,
-            data = '',
-            ...rest
-        } = useSWR(web3 && 'web3/network', async () => {
-            const networkName = await web3.eth.getChainId();
-            if (!networkName) {
-                throw new Error('No network found. Please refresh the browser');
+        const { data = '', ...rest } = useSWR(
+            web3 && 'web3/network',
+            async () => {
+                const networkName = await web3.eth.getChainId();
+                if (!networkName) {
+                    throw new Error(
+                        'No network found. Please refresh the browser'
+                    );
+                }
+                return NETWORKS[networkName];
             }
-            return NETWORKS[networkName];
-        });
-
-        useEffect(() => {
-            const mutator = (chainId) => mutate(NETWORKS[chainId]);
-            provider?.on('chainChanged', mutator);
-            return () => {
-                provider?.removeListener('chainChanged', mutator);
-            };
-        }, [provider]);
+        );
 
         return {
             data,
             isSupported: data === targetNetwork,
-            mutate,
             targetNetwork,
             ...rest
         };

@@ -13,6 +13,10 @@ import { loadContract } from '@utils/loadContract';
 
 const Web3Context = createContext();
 
+const setListeners = (provider) => {
+    provider.on('chainChanged', (_) => window.location.reload());
+};
+
 const createWeb3State = ({ web3, provider, contract, isLoading }) => {
     return {
         contract,
@@ -45,6 +49,7 @@ const Web3Provider = ({ children }) => {
             }
             const web3 = new Web3(provider);
             const contract = await loadContract('CourseMarketPlace', web3);
+            setListeners(provider);
             setWeb3Api(
                 createWeb3State({
                     provider,
