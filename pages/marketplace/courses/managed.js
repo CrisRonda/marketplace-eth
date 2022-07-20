@@ -12,17 +12,17 @@ const Manage = () => {
     const { managedCourses } = useManageCourses(account);
     const { web3, contract } = useWeb3();
     const [searchedCourse, setSearchedCourse] = useState(null);
-
+    const [filters, setFilters] = useState({
+        state: 'all'
+    });
     if (!account.isAdmin) {
         return null;
     }
     const changeCourseState = async (courseHash, method) => {
         try {
-            console.log(1);
             await contract.methods[method](courseHash).send({
                 from: account.data
             });
-            console.log(2);
         } catch (error) {
             console.error(error);
             console.log(3);
@@ -37,7 +37,6 @@ const Manage = () => {
 
     const searchCourse = async (hash) => {
         const isHex = /[0-9A-Fa-f]{6}/;
-        console.log(1);
         if (hash && hash.length === 66 && isHex.test(hash)) {
             const course = await contract.methods.getCourseByHash(hash).call();
             if (course.owner != '0x0000000000000000000000000000000000000000') {
@@ -45,18 +44,28 @@ const Manage = () => {
                     { hash },
                     course
                 );
-                console.log(2, normalized);
                 return setSearchedCourse(normalized);
             }
         }
-        console.log(3);
         setSearchedCourse(null);
     };
+
+    const filterCourses = managedCourses.data?.filter((course) => {
+        if (filters.state === 'all') {
+            return true;
+        }
+        return course.state === filters.state;
+    });
 
     return (
         <>
             <Header />
-            <CourseFilter onSearchSubmit={searchCourse} />
+            <CourseFilter
+                onSearchSubmit={searchCourse}
+                onFilterSelected={(value) =>
+                    setFilters((bef) => ({ ...bef, state: value }))
+                }
+            />
             <section className="grid grid-cols-1">
                 {searchedCourse && (
                     <div>
@@ -70,16 +79,22 @@ const Manage = () => {
                         />
                     </div>
                 )}
-                <h1 className="text-2xl font-bold p-5">All Courses</h1>
-                {managedCourses.data?.map((course) => (
-                    <VerificationInput
-                        key={course.ownedCourseId}
-                        course={course}
-                        web3={web3}
-                        activateCourse={activateCourse}
-                        deactivateCourse={deactivateCourse}
-                    />
-                ))}
+                <h1 className="text-2xl font-bold p-5">
+                    {filters.state.toUpperCase()} Courses
+                </h1>
+                {filterCourses?.length ? (
+                    filterCourses.map((course) => (
+                        <VerificationInput
+                            key={course.ownedCourseId}
+                            course={course}
+                            web3={web3}
+                            activateCourse={activateCourse}
+                            deactivateCourse={deactivateCourse}
+                        />
+                    ))
+                ) : (
+                    <Message type="danger">Not found courses</Message>
+                )}
             </section>
         </>
     );
