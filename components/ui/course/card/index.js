@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { AnimateKeyframes } from 'react-simple-animate';
 
 const Card = ({
     title,
@@ -9,7 +10,8 @@ const Card = ({
     description,
     slug,
     Footer,
-    disabled
+    disabled,
+    state
 }) => {
     return (
         <div
@@ -31,8 +33,37 @@ const Card = ({
                     />
                 </div>
                 <div className="p-8  pb-4 flex-2">
-                    <div className="h-12 uppercase tracking-wide text-sm text-indigo-500 font-semibold">
-                        {type}
+                    <div className="flex items-center">
+                        <div className="uppercase tracking-wide text-sm text-indigo-500 font-semibold ">
+                            {type}
+                        </div>
+
+                        <div>
+                            {state === 'activated' && (
+                                <div className="text-xs rounded-full p-2 ml-2 bg-green-400">
+                                    Activated
+                                </div>
+                            )}
+                            {state === 'deactivated' && (
+                                <div className="text-xs rounded-full p-2 ml-2 bg-red-600">
+                                    Deactivated
+                                </div>
+                            )}
+                            {state === 'purchased' && (
+                                <AnimateKeyframes
+                                    play
+                                    duration={1.5}
+                                    iterationCount="infinite"
+                                    easeType="ease"
+                                    direction="alternate"
+                                    keyframes={['opacity: .3', 'opacity: 1']}
+                                >
+                                    <div className="text-xs rounded-full p-2 ml-2 bg-yellow-400">
+                                        Waiting for activation
+                                    </div>
+                                </AnimateKeyframes>
+                            )}
+                        </div>
                     </div>
                     <Link href={`/course/${slug}`}>
                         <a className="block mt-1 text-sm xs:text-lg leading-tight font-medium text-black hover:underline">

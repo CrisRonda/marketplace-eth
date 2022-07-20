@@ -40,7 +40,14 @@ const handleuseOwnedCourses = (web3, contract) => (courses, account) => {
         }
     );
 
-    return swrRes;
+    return {
+        ...swrRes,
+        lookup:
+            swrRes?.data?.reduce?.((acum, curr) => {
+                acum[curr.id] = curr;
+                return acum;
+            }, {}) ?? {}
+    };
 };
 
 export default handleuseOwnedCourses;

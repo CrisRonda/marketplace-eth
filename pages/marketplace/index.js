@@ -3,16 +3,22 @@ import { useState } from 'react';
 import { List, Card as CourseCard } from '@components/ui/course';
 import { BaseLayout } from '@components/ui/layout';
 import { getAllCourse } from '@content/courses/fetcher';
-import { useWalletInfo } from '@components/hooks/web3';
-import { Button } from '@components/ui/common';
+import { useOwnedCourses, useWalletInfo } from '@components/hooks/web3';
+import { Button, Loader, Message } from '@components/ui/common';
 import { OrderModal } from '@components/ui/order';
 import { Header } from '@components/ui/marketplace';
 import { useWeb3 } from '@components/providers';
 
 export default function Marketplace({ courses }) {
     const [selectedCourse, setSelectedCourse] = useState(null);
-    const { hasConnectedWallet, account, isConnecting } = useWalletInfo();
+    const { hasConnectedWallet, account, isConnecting, network } =
+        useWalletInfo();
     const { web3, contract, requiredInstall } = useWeb3();
+    const { ownedCourses } = useOwnedCourses(
+        courses,
+        account.data,
+        network.data
+    );
 
     const purchaseCourse = async (order) => {
         // Get hex from course id
@@ -62,50 +68,98 @@ export default function Marketplace({ courses }) {
         <>
             <Header />
             <List courses={courses}>
-                {(course) => (
-                    <CourseCard
-                        key={course.id}
-                        {...course}
-                        disabled={!hasConnectedWallet}
-                        Footer={() => {
-                            if (requiredInstall) {
+                {(course) => {
+                    const owned = ownedCourses.lookup[course.id];
+                    return (
+                        <CourseCard
+                            key={course.id}
+                            {...course}
+                            state={owned?.state}
+                            disabled={!hasConnectedWallet}
+                            Footer={() => {
+                                if (requiredInstall) {
+                                    return (
+                                        <Button
+                                            onClick={() =>
+                                                setSelectedCourse(course)
+                                            }
+                                            variant="purple"
+                                            disabled={!hasConnectedWallet}
+                                        >
+                                            Install
+                                        </Button>
+                                    );
+                                }
+                                if (isConnecting) {
+                                    return (
+                                        <Button
+                                            onClick={() =>
+                                                setSelectedCourse(course)
+                                            }
+                                            variant="purple"
+                                            disabled={!hasConnectedWallet}
+                                        >
+                                            <Loader />
+                                        </Button>
+                                    );
+                                }
+                                if (!ownedCourses.hasInitialResponse) {
+                                    return (
+                                        <div
+                                            style={{
+                                                height: 50
+                                            }}
+                                        />
+                                    );
+                                }
+                                if (owned) {
+                                    return (
+                                        <>
+                                            <div>
+                                                <Button
+                                                    onClick={() =>
+                                                        setSelectedCourse(
+                                                            course
+                                                        )
+                                                    }
+                                                    variant="white"
+                                                    disabled={true}
+                                                >
+                                                    Owned
+                                                </Button>
+                                                {owned.state ===
+                                                    'deactivated' && (
+                                                    <Button
+                                                        variant="purple"
+                                                        onClick={() =>
+                                                            alert(
+                                                                'Reactivating'
+                                                            )
+                                                        }
+                                                        disabled={false}
+                                                    >
+                                                        Fund to Activate
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        </>
+                                    );
+                                }
                                 return (
                                     <Button
                                         onClick={() =>
                                             setSelectedCourse(course)
                                         }
-                                        variant="purple"
+                                        variant="green"
                                         disabled={!hasConnectedWallet}
                                     >
-                                        Install
+                                        Purchase
                                     </Button>
                                 );
-                            }
-                            if (isConnecting) {
-                                return (
-                                    <Button
-                                        onClick={() =>
-                                            setSelectedCourse(course)
-                                        }
-                                        variant="purple"
-                                        disabled={!hasConnectedWallet}
-                                    >
-                                        Connecting...
-                                    </Button>
-                                );
-                            }
-                            return (
-                                <Button
-                                    onClick={() => setSelectedCourse(course)}
-                                    variant="green"
-                                    disabled={!hasConnectedWallet}
-                                >
-                                    Purchase
-                                </Button>
-                            );
-                        }}
-                    />
-                )}
+                            }}
+                        />
+                    );
+                }}
             </List>
 
             {selectedCourse && (
