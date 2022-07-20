@@ -14,11 +14,10 @@ const Manage = () => {
     if (!account.isAdmin) {
         return null;
     }
-
-    const activateCourse = async (courseHash) => {
+    const changeCourseState = async (courseHash, method) => {
         try {
             console.log(1);
-            await contract.methods.activateCourse(courseHash).send({
+            await contract.methods[method](courseHash).send({
                 from: account.data
             });
             console.log(2);
@@ -26,19 +25,14 @@ const Manage = () => {
             console.error(error);
             console.log(3);
         }
+    };
+    const activateCourse = async (courseHash) => {
+        changeCourseState(courseHash, 'activateCourse');
     };
     const deactivateCourse = async (courseHash) => {
-        try {
-            console.log(1);
-            await contract.methods.deactivateCourse(courseHash).send({
-                from: account.data
-            });
-            console.log(2);
-        } catch (error) {
-            console.error(error);
-            console.log(3);
-        }
+        changeCourseState(courseHash, 'deactivateCourse');
     };
+
     return (
         <>
             <Header />
