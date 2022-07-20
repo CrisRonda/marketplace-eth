@@ -5,11 +5,13 @@ import { CourseFilter, ManagedCourseCard } from '@components/ui/course';
 import { BaseLayout } from '@components/ui/layout';
 import { Header } from '@components/ui/marketplace';
 import { useWeb3 } from '@components/providers';
+import { normalizeOwnedCourses } from '@utils/normalize';
 
 const Manage = () => {
     const { account } = useAdmin({ redirectTo: '/marketplace' });
     const { managedCourses } = useManageCourses(account);
     const { web3, contract } = useWeb3();
+    const [searchedCourse, setSearchedCourse] = useState(null);
 
     if (!account.isAdmin) {
         return null;
@@ -33,11 +35,42 @@ const Manage = () => {
         changeCourseState(courseHash, 'deactivateCourse');
     };
 
+    const searchCourse = async (hash) => {
+        const isHex = /[0-9A-Fa-f]{6}/;
+        console.log(1);
+        if (hash && hash.length === 66 && isHex.test(hash)) {
+            const course = await contract.methods.getCourseByHash(hash).call();
+            if (course.owner != '0x0000000000000000000000000000000000000000') {
+                const normalized = normalizeOwnedCourses(web3)(
+                    { hash },
+                    course
+                );
+                console.log(2, normalized);
+                return setSearchedCourse(normalized);
+            }
+        }
+        console.log(3);
+        setSearchedCourse(null);
+    };
+
     return (
         <>
             <Header />
-            <CourseFilter />
+            <CourseFilter onSearchSubmit={searchCourse} />
             <section className="grid grid-cols-1">
+                {searchedCourse && (
+                    <div>
+                        <h1 className="text-2xl font-bold p-5">Search</h1>
+                        <VerificationInput
+                            course={searchedCourse}
+                            web3={web3}
+                            activateCourse={activateCourse}
+                            deactivateCourse={deactivateCourse}
+                            isSearched
+                        />
+                    </div>
+                )}
+                <h1 className="text-2xl font-bold p-5">All Courses</h1>
                 {managedCourses.data?.map((course) => (
                     <VerificationInput
                         key={course.ownedCourseId}
@@ -58,7 +91,8 @@ const VerificationInput = ({
     course,
     web3,
     activateCourse,
-    deactivateCourse
+    deactivateCourse,
+    isSearched = false
 }) => {
     const [email, setEmail] = useState('');
     const [proofedOwnership, setProofedOwnership] = useState({});
@@ -81,7 +115,11 @@ const VerificationInput = ({
         });
     };
     return (
-        <ManagedCourseCard key={course.ownedCourseId} course={course}>
+        <ManagedCourseCard
+            key={course.ownedCourseId}
+            course={course}
+            isSearched={isSearched}
+        >
             <div className="flex mr-2 relative rounded-md">
                 <input
                     value={email}
