@@ -19,6 +19,7 @@ export default function Marketplace({ courses }) {
         account.data,
         network.data
     );
+    const [isNewPurchase, setIsNewPurchase] = useState(true);
 
     const purchaseCourse = async (order) => {
         // Get hex from course id
@@ -38,23 +39,32 @@ export default function Marketplace({ courses }) {
             }
         );
 
-        // Get hash from user's email
-        const emailHash = web3.utils.soliditySha3(order.email);
-
-        // join the emailHash [emailHash][orderHash]
-        // this join has 64 bytes
-        const proof = web3.utils.soliditySha3(
-            {
-                type: 'bytes32',
-                value: emailHash
-            },
-            {
-                type: 'bytes32',
-                value: orderHash
-            }
-        );
         const price = web3.utils.toWei(String(order.price));
 
+        if (isNewPurchase) {
+            console.log(1);
+            // Get hash from user's email
+            const emailHash = web3.utils.soliditySha3(order.email);
+            // join the emailHash [emailHash][orderHash]
+            // this join has 64 bytes
+            const proof = web3.utils.soliditySha3(
+                {
+                    type: 'bytes32',
+                    value: emailHash
+                },
+                {
+                    type: 'bytes32',
+                    value: orderHash
+                }
+            );
+            _purchaseCourse(hexCourseId, proof, price);
+        } else {
+            console.log(2);
+            _repurchaseCourse(orderHash, price);
+        }
+    };
+
+    const _purchaseCourse = async (hexCourseId, proof, price) => {
         try {
             const result = await contract.methods
                 .purchaseCourse(hexCourseId, proof)
@@ -63,7 +73,15 @@ export default function Marketplace({ courses }) {
             console.log(error);
         }
     };
-
+    const _repurchaseCourse = async (courseHash, price) => {
+        try {
+            const result = await contract.methods
+                .repurchaseCourse(courseHash)
+                .send({ from: account.data, value: price });
+        } catch (error) {
+            console.log(error);
+        }
+    };
     return (
         <>
             <Header />
@@ -80,6 +98,7 @@ export default function Marketplace({ courses }) {
                                 if (requiredInstall) {
                                     return (
                                         <Button
+                                            size="sm"
                                             onClick={() =>
                                                 setSelectedCourse(course)
                                             }
@@ -93,6 +112,7 @@ export default function Marketplace({ courses }) {
                                 if (isConnecting) {
                                     return (
                                         <Button
+                                            size="sm"
                                             onClick={() =>
                                                 setSelectedCourse(course)
                                             }
@@ -117,25 +137,31 @@ export default function Marketplace({ courses }) {
                                         <>
                                             <div>
                                                 <Button
-                                                    onClick={() =>
-                                                        setSelectedCourse(
-                                                            course
-                                                        )
-                                                    }
+                                                    size="sm"
                                                     variant="white"
                                                     disabled={true}
+                                                    className="mr-1"
+                                                    onClick={() =>
+                                                        alert(
+                                                            'You are the owner'
+                                                        )
+                                                    }
                                                 >
-                                                    Owned
+                                                    Yours &#10004;
                                                 </Button>
                                                 {owned.state ===
                                                     'deactivated' && (
                                                     <Button
+                                                        size="sm"
                                                         variant="purple"
-                                                        onClick={() =>
-                                                            alert(
-                                                                'Reactivating'
-                                                            )
-                                                        }
+                                                        onClick={() => {
+                                                            setIsNewPurchase(
+                                                                false
+                                                            );
+                                                            setSelectedCourse(
+                                                                course
+                                                            );
+                                                        }}
                                                         disabled={false}
                                                     >
                                                         Fund to Activate
@@ -147,6 +173,7 @@ export default function Marketplace({ courses }) {
                                 }
                                 return (
                                     <Button
+                                        size="sm"
                                         onClick={() =>
                                             setSelectedCourse(course)
                                         }
@@ -165,7 +192,11 @@ export default function Marketplace({ courses }) {
             {selectedCourse && (
                 <OrderModal
                     course={selectedCourse}
-                    onClose={() => setSelectedCourse(null)}
+                    isNewPurchase={isNewPurchase}
+                    onClose={() => {
+                        setSelectedCourse(null);
+                        setIsNewPurchase(true);
+                    }}
                     onSubmit={purchaseCourse}
                 />
             )}
