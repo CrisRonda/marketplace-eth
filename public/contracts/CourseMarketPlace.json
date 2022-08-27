@@ -17161,12 +17161,12 @@
     "5777": {
       "events": {},
       "links": {},
-      "address": "0x2534c42F1dfB58d04ABB48A2e5d97B537B849D5f",
-      "transactionHash": "0xfa2ba1ae04926320f100e79e867d80e8766e00c238cdf40211894a04b1550108"
+      "address": "0x1fB8F595829c3EE8F6CF5367943867EE9bdC46ab",
+      "transactionHash": "0x2641f6110b2bd5c7eae1440b68b2f45c610dda55ab3c6bdcc3e7fcbd81dc61da"
     }
   },
   "schemaVersion": "3.4.6",
-  "updatedAt": "2022-07-20T18:12:10.225Z",
+  "updatedAt": "2022-08-27T19:05:40.235Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",

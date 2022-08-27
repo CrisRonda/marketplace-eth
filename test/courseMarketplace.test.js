@@ -400,6 +400,65 @@ contract('CourseMarketplace', (accounts) => {
             assert.equal(toBN(newContractBalance), 0, 'Withdraw unsucced');
         });
     });
+
+    describe('Self destruct', () => {
+        let currentOwner;
+        before(async () => {
+            currentOwner = await _contract.getContractOwner();
+        });
+
+        /**
+         * we have to put isStopped flag in false after each test case
+         */
+        after(async () => {
+            await _contract.resumeContract();
+        });
+
+        it('should fail when contract is NOT stopped', async () => {
+            await _contract.resumeContract();
+            await catchRevert(_contract.selfDestruct({ from: currentOwner }));
+        });
+
+        it('shouldhave +contract funds on contract owner', async () => {
+            await _contract.stopContract({
+                from: contractOwner
+            });
+            const contractBalance = await getBalance(_contract.address);
+            const ownerBalance = await getBalance(currentOwner);
+            // you can see the contrac as a byte before destroying it
+            // const code = await web3.eth.getCode(_contract.address);
+            // console.log(code);
+
+            const result = await _contract.selfDestruct({
+                from: currentOwner
+            });
+
+            const gas = await getGas(result);
+            const newContractBalance = await getBalance(_contract.address);
+            const newOwnerBalance = await getBalance(currentOwner);
+            assert.equal(
+                toBN(ownerBalance).add(toBN(contractBalance).sub(gas)),
+                newOwnerBalance,
+                'Owner doesnt have contact balance'
+            );
+            assert.equal(toBN(newContractBalance), 0, 'Withdraw unsucced');
+        });
+
+        it('should have contract balance of 0', async () => {
+            const contractBalance = await getBalance(_contract.address);
+            assert.equal(
+                contractBalance,
+                0,
+                'Contract does not have 0 balance'
+            );
+        });
+
+        it('should have 0x bytecode', async () => {
+            const code = await web3.eth.getCode(_contract.address);
+            console.log(code);
+            assert.equal(code, '0x', 'Contract is not destroyed');
+        });
+    });
 });
 
 // Owner value
