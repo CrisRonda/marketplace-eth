@@ -307,6 +307,99 @@ contract('CourseMarketplace', (accounts) => {
             );
         });
     });
+
+    describe('Receive funds', () => {
+        it('should have transacted funds', async () => {
+            const value = '100000000000000000';
+            const contractBeforeTx = await getBalance(_contract.address);
+            await web3.eth.sendTransaction({
+                from: buyer,
+                to: _contract.address,
+                value
+            });
+            const contractAfterTx = await getBalance(_contract.address);
+            assert.equal(
+                toBN(contractBeforeTx).add(toBN(value)).toString(),
+                contractAfterTx,
+                'Value after transaction is not matching'
+            );
+        });
+    });
+
+    describe('Normal withdraw', () => {
+        const fundToDeposit = '100000000000000000';
+        const overLimitFunds = '99999900000000000000';
+        let currentOwner;
+        before(async () => {
+            currentOwner = await _contract.getContractOwner();
+            await web3.eth.sendTransaction({
+                from: buyer,
+                to: _contract.address,
+                value: fundToDeposit
+            });
+        });
+
+        it('should fail when withdrawing with NOT owner address', async () => {
+            const value = '10000000000000000';
+            await catchRevert(_contract.withdraw(value, { from: buyer }));
+        });
+
+        it('should fail when withdrawing with OVER limit balance', async () => {
+            await catchRevert(
+                _contract.withdraw(overLimitFunds, { from: currentOwner })
+            );
+        });
+
+        it('should have +0.1ETH after withdraw ', async () => {
+            const ownerBalance = await getBalance(currentOwner);
+            const result = await _contract.withdraw(fundToDeposit, {
+                from: currentOwner
+            });
+            const newOwnerBalance = await getBalance(currentOwner);
+            const gas = await getGas(result);
+            assert.equal(
+                toBN(ownerBalance)
+                    .add(toBN(fundToDeposit))
+                    .sub(toBN(gas))
+                    .toString(),
+                newOwnerBalance,
+                'The owner balance is not correct'
+            );
+        });
+    });
+
+    describe('Emergency withdraw', () => {
+        let currentOwner;
+        before(async () => {
+            currentOwner = await _contract.getContractOwner();
+        });
+
+        it('should fail when contract is NOT stopped', async () => {
+            await catchRevert(_contract.emergencyWithdraw());
+        });
+
+        it('shouldhave +contract funds on contract owner', async () => {
+            await _contract.stopContract({
+                from: contractOwner
+            });
+            const contractBalance = await getBalance(_contract.address);
+            const ownerBalance = await getBalance(currentOwner);
+
+            const result = await _contract.emergencyWithdraw({
+                from: currentOwner
+            });
+
+            const gas = await getGas(result);
+            const newContractBalance = await getBalance(_contract.address);
+            const newOwnerBalance = await getBalance(currentOwner);
+            assert.equal(
+                toBN(ownerBalance).add(toBN(contractBalance).sub(gas)),
+                newOwnerBalance,
+                'Owner doesnt have contact balance'
+            );
+            assert.equal(toBN(newContractBalance), 0, 'Withdraw unsucced');
+        });
+    });
 });
 
 // Owner value

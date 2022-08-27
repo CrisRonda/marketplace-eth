@@ -15,6 +15,8 @@ contract CourseMarketPlace {
         State state; // 1 Byte
     }
 
+    bool public isStopped = false;
+    
 // mapping of courseHast to Course data
     mapping(bytes32 => Course) private ownedCourses;
 
@@ -39,6 +41,21 @@ contract CourseMarketPlace {
         }
         _;
     }
+    modifier onlyWhenNotStopped()
+    {
+       require(!isStopped);
+        _;
+    }
+
+    modifier onlyWhenStopped()
+    {
+       require(isStopped);
+        _;
+    }
+
+    // this func is for reciving payments
+    receive() external payable{}
+
 
 // errors
     /// This course has already a Owner!
@@ -56,6 +73,44 @@ contract CourseMarketPlace {
     // Course is not created!!
     error CourseIsNotCreated();
 
+    function withdraw(uint amount)
+    external
+    onlyOwner
+    {
+       (bool success,) = owner.call{value: amount}("");
+       require(success, "Transfer failed");
+    }
+    function emergencyWithdraw()
+    external
+    onlyWhenStopped
+    onlyOwner
+    {
+       (bool success,) = owner.call{value: address(this).balance}("");
+       require(success, "Transfer failed");
+    }
+
+    function selfDestruct()
+    external
+    onlyWhenStopped
+    onlyOwner
+    {
+        selfdestruct(owner);
+    }
+
+    function stopContract()
+    external
+    onlyOwner
+    {
+        isStopped = true;
+    }
+
+    function resumeContract()
+    external
+    onlyOwner
+    {
+        isStopped = false;
+    }
+
 //  course id - 10 --> this is the course ID
 // 0x00000000000000000000000000003130 -> this is the course ID in hex
 // 0x0000000000000000000000000000313000000000000000000000000000003130 --> fake proof
@@ -64,7 +119,10 @@ contract CourseMarketPlace {
 // keccak256 c4eaa3558504e2baa2669001b43f359b8418b44a4477ff417b4b007d7cc86e37 -> [courseId_HEX][USER_ACCOUNT] hashed in keccak256
        //--> c4eaa3558504e2baa2669001b43f359b8418b44a4477ff417b4b007d7cc86e37  --> The contract generate the same hash
     function purchaseCourse(bytes16 courseId, bytes32 proof)
-    external payable returns(bytes32)
+    external 
+    payable 
+    onlyWhenNotStopped
+    returns(bytes32)
     {
         bytes32 courseHash = keccak256(abi.encodePacked(courseId, msg.sender));
         if(hasCourseOwnership(courseHash)){
@@ -85,6 +143,7 @@ contract CourseMarketPlace {
     function repurchaseCourse(bytes32 courseHash)
     external
     payable
+    onlyWhenNotStopped
     {
         if (!isCourseCreated(courseHash)) {
            revert CourseIsNotCreated();
@@ -104,6 +163,7 @@ contract CourseMarketPlace {
 
     function activateCourse(bytes32 courseHash)
     external
+    onlyWhenNotStopped
     onlyOwner
   {
     if (!isCourseCreated(courseHash)) {
@@ -121,6 +181,7 @@ contract CourseMarketPlace {
 
   function deactivateCourse(bytes32 courseHash)
     external
+    onlyWhenNotStopped
     onlyOwner
   {
     if (!isCourseCreated(courseHash)) {
