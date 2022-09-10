@@ -4,10 +4,11 @@ import { List, Card as CourseCard } from '@components/ui/course';
 import { BaseLayout } from '@components/ui/layout';
 import { getAllCourse } from '@content/courses/fetcher';
 import { useOwnedCourses, useWalletInfo } from '@components/hooks/web3';
-import { Button, Loader, Message } from '@components/ui/common';
+import { Button, Loader } from '@components/ui/common';
 import { OrderModal } from '@components/ui/order';
 import { Header } from '@components/ui/marketplace';
 import { useWeb3 } from '@components/providers';
+import { withToast } from '@utils/toast';
 
 export default function Marketplace({ courses }) {
     const [selectedCourse, setSelectedCourse] = useState(null);
@@ -20,10 +21,11 @@ export default function Marketplace({ courses }) {
         network.data
     );
     const [isNewPurchase, setIsNewPurchase] = useState(true);
+    const [busyCourseId, setBusyCourseId] = useState(null);
 
-    const purchaseCourse = async (order) => {
+    const purchaseCourse = async (order, course) => {
         // Get hex from course id
-        const hexCourseId = web3.utils.utf8ToHex(selectedCourse.id);
+        const hexCourseId = web3.utils.utf8ToHex(course.id);
 
         // join the hexCourseId with user's address [
         // hexCourseId][userAddress]
@@ -40,9 +42,8 @@ export default function Marketplace({ courses }) {
         );
 
         const price = web3.utils.toWei(String(order.price));
-
+        setBusyCourseId(course.id);
         if (isNewPurchase) {
-            console.log(1);
             // Get hash from user's email
             const emailHash = web3.utils.soliditySha3(order.email);
             // join the emailHash [emailHash][orderHash]
@@ -57,30 +58,60 @@ export default function Marketplace({ courses }) {
                     value: orderHash
                 }
             );
-            _purchaseCourse(hexCourseId, proof, price);
+            withToast(_purchaseCourse({ hexCourseId, proof, price }, course));
         } else {
-            console.log(2);
-            _repurchaseCourse(orderHash, price);
+            withToast(
+                _repurchaseCourse({ courseHash: orderHash, price }, course)
+            );
         }
     };
 
-    const _purchaseCourse = async (hexCourseId, proof, price) => {
+    const _purchaseCourse = async ({ hexCourseId, proof, price }, course) => {
         try {
             const result = await contract.methods
                 .purchaseCourse(hexCourseId, proof)
                 .send({ from: account.data, value: price });
+            ownedCourses.mutate([
+                ...ownedCourses.data,
+                {
+                    ...course,
+                    proof,
+                    price,
+                    state: 'purchased'
+                }
+            ]);
+            return result;
         } catch (error) {
-            console.log(error);
+            throw new Error(error.message);
+        } finally {
+            setBusyCourseId(null);
         }
     };
-    const _repurchaseCourse = async (courseHash, price) => {
+    const _repurchaseCourse = async ({ courseHash, price }, course) => {
         try {
             const result = await contract.methods
                 .repurchaseCourse(courseHash)
                 .send({ from: account.data, value: price });
+            const index = ownedCourses.data.findIndex(
+                (_course) => _course.id === course.id
+            );
+            if (index >= 0) {
+                ownedCourses.data[index].state = 'purchased';
+                ownedCourses.mutate(ownedCourses.data);
+            } else {
+                ownedCourses.mutate();
+            }
+            return result;
         } catch (error) {
-            console.log(error);
+            throw new Error(error.message);
+        } finally {
+            setBusyCourseId(null);
         }
+    };
+
+    const cleanupModal = () => {
+        setSelectedCourse(null);
+        setIsNewPurchase(true);
     };
     return (
         <>
@@ -125,13 +156,17 @@ export default function Marketplace({ courses }) {
                                 }
                                 if (!ownedCourses.hasInitialResponse) {
                                     return (
-                                        <div
-                                            style={{
-                                                height: 50
-                                            }}
-                                        />
+                                        <Button
+                                            disabled
+                                            size="small"
+                                            variant="white"
+                                        >
+                                            Loading state...
+                                        </Button>
                                     );
                                 }
+                                const isBusyCourse = busyCourseId === course.id;
+
                                 if (owned) {
                                     return (
                                         <>
@@ -153,7 +188,11 @@ export default function Marketplace({ courses }) {
                                                     'deactivated' && (
                                                     <Button
                                                         size="sm"
-                                                        variant="purple"
+                                                        variant={
+                                                            isBusyCourse
+                                                                ? 'white'
+                                                                : 'purple'
+                                                        }
                                                         onClick={() => {
                                                             setIsNewPurchase(
                                                                 false
@@ -162,9 +201,20 @@ export default function Marketplace({ courses }) {
                                                                 course
                                                             );
                                                         }}
-                                                        disabled={false}
+                                                        disabled={isBusyCourse}
                                                     >
-                                                        Fund to Activate
+                                                        {isBusyCourse ? (
+                                                            <div className="flex">
+                                                                <Loader size="sm" />
+                                                                <div className="ml-2">
+                                                                    InProgress
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <p>
+                                                                Fund to Activate
+                                                            </p>
+                                                        )}
                                                     </Button>
                                                 )}
                                             </div>
@@ -177,10 +227,23 @@ export default function Marketplace({ courses }) {
                                         onClick={() =>
                                             setSelectedCourse(course)
                                         }
-                                        variant="green"
-                                        disabled={!hasConnectedWallet}
+                                        variant={
+                                            isBusyCourse ? 'white' : 'green'
+                                        }
+                                        disabled={
+                                            !hasConnectedWallet || isBusyCourse
+                                        }
                                     >
-                                        Purchase
+                                        {isBusyCourse ? (
+                                            <div className="flex">
+                                                <Loader size="sm" />
+                                                <div className="ml-2">
+                                                    InProgress
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <p>Purchase</p>
+                                        )}
                                     </Button>
                                 );
                             }}
@@ -193,11 +256,11 @@ export default function Marketplace({ courses }) {
                 <OrderModal
                     course={selectedCourse}
                     isNewPurchase={isNewPurchase}
-                    onClose={() => {
-                        setSelectedCourse(null);
-                        setIsNewPurchase(true);
+                    onClose={cleanupModal}
+                    onSubmit={(formData, course) => {
+                        purchaseCourse(formData, course);
+                        cleanupModal();
                     }}
-                    onSubmit={purchaseCourse}
                 />
             )}
         </>

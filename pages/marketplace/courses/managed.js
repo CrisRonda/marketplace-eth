@@ -6,12 +6,14 @@ import { BaseLayout } from '@components/ui/layout';
 import { Header } from '@components/ui/marketplace';
 import { useWeb3 } from '@components/providers';
 import { normalizeOwnedCourses } from '@utils/normalize';
+import { withToast } from '@utils/toast';
 
 const Manage = () => {
     const { account } = useAdmin({ redirectTo: '/marketplace' });
     const { managedCourses } = useManageCourses(account);
     const { web3, contract } = useWeb3();
     const [searchedCourse, setSearchedCourse] = useState(null);
+    const [loading, setLoading] = useState(false);
     const [filters, setFilters] = useState({
         state: 'all'
     });
@@ -20,19 +22,22 @@ const Manage = () => {
     }
     const changeCourseState = async (courseHash, method) => {
         try {
-            await contract.methods[method](courseHash).send({
+            setLoading(true);
+            const result = await contract.methods[method](courseHash).send({
                 from: account.data
             });
+            return result;
         } catch (error) {
-            console.error(error);
-            console.log(3);
+            throw new Error(error.message);
+        } finally {
+            setLoading(false);
         }
     };
     const activateCourse = async (courseHash) => {
-        changeCourseState(courseHash, 'activateCourse');
+        withToast(changeCourseState(courseHash, 'activateCourse'));
     };
     const deactivateCourse = async (courseHash) => {
-        changeCourseState(courseHash, 'deactivateCourse');
+        withToast(changeCourseState(courseHash, 'deactivateCourse'));
     };
 
     const searchCourse = async (hash) => {
@@ -85,6 +90,7 @@ const Manage = () => {
                 {filterCourses?.length ? (
                     filterCourses.map((course) => (
                         <VerificationInput
+                            loading={loading}
                             key={course.ownedCourseId}
                             course={course}
                             web3={web3}
@@ -107,7 +113,8 @@ const VerificationInput = ({
     web3,
     activateCourse,
     deactivateCourse,
-    isSearched = false
+    isSearched = false,
+    loading
 }) => {
     const [email, setEmail] = useState('');
     const [proofedOwnership, setProofedOwnership] = useState({});
@@ -173,12 +180,14 @@ const VerificationInput = ({
             {course.state === 'purchased' && (
                 <div className="mt-4">
                     <Button
+                        disabled={loading}
                         variant="green"
                         onClick={() => activateCourse(course.hash)}
                     >
                         Activate
                     </Button>
                     <Button
+                        disabled={loading}
                         variant="red"
                         onClick={() => deactivateCourse(course.hash)}
                     >

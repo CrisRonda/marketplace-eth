@@ -1,4 +1,6 @@
+import { ToastContainer } from 'react-toastify';
 import '@styles/globals.css';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Noop = ({ children }) => <>{children}</>;
 function MyApp({ Component, pageProps }) {
@@ -6,6 +8,7 @@ function MyApp({ Component, pageProps }) {
     return (
         <Layout>
             <Component {...pageProps} />
+            <ToastContainer />
         </Layout>
     );
 }
