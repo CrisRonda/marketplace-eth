@@ -161,7 +161,9 @@ export default function Marketplace({ courses }) {
                                             size="small"
                                             variant="white"
                                         >
-                                            Loading state...
+                                            {hasConnectedWallet
+                                                ? 'Loading state...'
+                                                : 'Connect'}
                                         </Button>
                                     );
                                 }
